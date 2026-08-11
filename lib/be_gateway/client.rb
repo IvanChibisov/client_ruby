@@ -81,6 +81,10 @@ module BeGateway
       send_request('put', "/v2/credit_cards/#{token}", request: params)
     end
 
+    def v2_delete_credit_card(token)
+      send_request('delete', "/v2/credit_cards/#{token}")
+    end
+
     TRANSACTION_OPERATIONS.each do |op_type|
       define_method op_type.to_sym do |params|
         send_request('post', action_url_for_operation(op_type, params[:uid]), request: params)

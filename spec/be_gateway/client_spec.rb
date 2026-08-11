@@ -271,6 +271,29 @@ describe BeGateway::Client do
           expect(response.token).to eq '7ba647e7013b5cb9df39f17c375783aef81bc8c20f221b962becbd0686cc33af'
         end
       end
+
+      context 'delete by token' do
+        it 'DELETEs the card and exposes the HTTP code' do
+          expect_any_instance_of(Faraday::Connection)
+            .to receive(:delete).with("/v2/credit_cards/#{token}", nil)
+            .and_return(OpenStruct.new(status: 200, body: nil))
+
+          response = client.v2_delete_credit_card(token)
+
+          expect(response.successful?).to be true
+          expect(response.code).to eq 200
+        end
+
+        it 'surfaces a non-2xx HTTP code (e.g. 404 already gone)' do
+          allow_any_instance_of(Faraday::Connection)
+            .to receive(:delete).and_return(OpenStruct.new(status: 404, body: nil))
+
+          response = client.v2_delete_credit_card(token)
+
+          expect(response.invalid?).to be true
+          expect(response.code).to eq 404
+        end
+      end
     end
   end
 

@@ -10,5 +10,9 @@ module BeGateway
     def query(token)
       send_request('get', "/ctp/api/checkouts/#{token}")
     end
+
+    def delete_credit_card(token)
+      send_request('delete', "/ctp/api/credit_cards/#{token}")
+    end
   end
 end
