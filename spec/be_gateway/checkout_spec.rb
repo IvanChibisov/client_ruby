@@ -164,5 +164,30 @@ describe BeGateway::Checkout do
         expect(response.errors.gateway).to eq('is temporarily unavailable')
       end
     end
+
+    describe '#delete_credit_card' do
+      let(:token) { '3241e439f8c87d941d92621a4bdc030d4c9a69c67f3b0cfe12de4a13cc34aa51' }
+
+      it 'DELETEs the card and exposes the HTTP code' do
+        expect_any_instance_of(Faraday::Connection)
+          .to receive(:delete).with("/ctp/api/credit_cards/#{token}", nil)
+          .and_return(OpenStruct.new(status: 200, body: nil))
+
+        response = checkout.delete_credit_card(token)
+
+        expect(response.successful?).to be true
+        expect(response.code).to eq 200
+      end
+
+      it 'surfaces a non-2xx HTTP code' do
+        allow_any_instance_of(Faraday::Connection)
+          .to receive(:delete).and_return(OpenStruct.new(status: 401, body: nil))
+
+        response = checkout.delete_credit_card(token)
+
+        expect(response.invalid?).to be true
+        expect(response.code).to eq 401
+      end
+    end
   end
 end
